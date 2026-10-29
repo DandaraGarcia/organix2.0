@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Perguntas | Organix</title>
+<body data-app><div class="app"><aside id="menu"></aside><main><h1>Perguntas</h1>
+<p class="mut" style="margin:-10px 0 18px;max-width:60ch">Tire suas dúvidas sobre como usar cada parte do Organix. Clique em uma pergunta para ver a resposta.</p>
+<div style="max-width:420px;margin-bottom:8px"><label for="busca" style="margin-top:0">Buscar uma dúvida</label><input id="busca" type="search" placeholder="Ex.: calendário, treino, água" autocomplete="off"></div>
+<div class="faq" id="faq"></div></main></div><script src="app.js"></script><script>
+(()=>{
+const Q=[
+['Primeiros passos',[
+['Como começo a usar o Organix?','Crie sua conta em “Começar grátis” informando nome, e-mail e senha. Depois do cadastro você cai na tela Início, onde já está o seu “Meu dia”. O menu à esquerda leva às demais seções.'],
+['Quais seções são gratuitas e quais são Premium?','No plano gratuito ficam liberadas Início, Agenda de entregas e Perguntas. Registro do dia, Finanças, Trabalho, Alimentação e Academia fazem parte do Premium e aparecem com a etiqueta “Premium” no menu.'],
+['Como assino o Premium?','Clique em “Assinar Premium” no menu lateral ou no aviso da tela Início e preencha a tela de pagamento. O ambiente é de demonstração: nenhum valor é cobrado de verdade.'],
+['Meus registros ficam salvos quando eu saio do site?','Sim. Tudo o que você registra fica guardado no navegador e aparece de novo quando você volta. Atenção: se você limpar os dados do navegador ou usar uma aba anônima, os registros deste aparelho são apagados.'],
+['Posso ver meus registros em outro celular ou computador?','Ainda não. Os registros ficam guardados no aparelho e no navegador em que você os fez, e não são sincronizados entre aparelhos.']]],
+['Início',[
+['Como adiciono ou removo atividades do “Meu dia”?','Abaixo da lista, digite o nome da atividade, escolha o horário e clique em “Adicionar”. Para tirar uma atividade, clique no × no fim da linha. As atividades “Treino leve”, “Bloco de estudo”, “Trabalho focado” e “Tempo para mim” já vêm prontas, mas você pode removê-las.'],
+['Como o “Progresso da semana” é calculado?','Ele só conta os dias em que você realmente marcou atividades no Meu dia. Dias sem registro aparecem com um traço e não entram na média. Quanto mais você usa, mais completo o gráfico fica.'],
+['O que é a “Sequência”?','É o número de dias seguidos em que você concluiu pelo menos uma atividade do Meu dia. Se você deixar um dia passar sem marcar nada, a contagem recomeça.']]],
+['Agenda de entregas',[
+['Como registro e acompanho uma entrega?','Escreva o nome do trabalho, escolha a data de entrega e clique em “Adicionar”. Em cada cartão, arraste a barra para informar quanto você já avançou. O progresso é salvo na hora.'],
+['Como organizo a ordem das entregas?','Use a caixa “Ordenar por”. As opções são menor tempo de entrega, maior tempo de entrega, maior progresso, menor progresso e ordem alfabética. A sua escolha fica salva.'],
+['Como removo uma entrega?','Clique no × no canto do cartão e confirme em “Sim”.']]],
+['Registro do dia',[
+['Como funciona o calendário?','Ele mostra um mês por vez. Use as setas ou a caixa de seleção no topo para ver meses anteriores ou seguintes. Clique em um dia para abrir o bloco abaixo do calendário, onde você dá um nome ao dia, escolhe uma cor e monta a lista de atividades.'],
+['Posso escolher uma cor para o dia?','Sim: vermelho, azul, amarelo, rosa, verde, roxo, laranja, cinza ou branco. Sem escolha, o dia fica preto, que é a cor padrão. Para voltar ao preto, clique na bolinha escura “Padrão”.'],
+['Como funcionam as atividades de cada dia?','Cada atividade tem nome (até 50 caracteres) e descrição (até 250). Você só consegue marcar como concluídas as atividades de hoje ou de dias anteriores, já que dias futuros ainda não aconteceram.'],
+['O que é o botão “resumo do dia”?','Em cada dia do calendário há um botão pequeno “resumo do dia”. Ele abre um painel com tudo o que você registrou naquela data: Meu dia, atividades, finanças, trabalho, alimentação e treino.']]],
+['Finanças',[
+['Como registro uma receita ou um gasto?','Preencha nome (até 30 caracteres), descrição, valor e tipo, e clique em “Adicionar”. O saldo, as receitas e os gastos do mês são atualizados na hora. Para apagar um lançamento use o ×, ou “Apagar todos” para limpar a lista.'],
+['O que acontece quando eu fecho o mês?','O botão “Fechar o mês” pergunta se você tem certeza. Se você responder “Sim”, o Organix monta um dashboard com os registros desde o início do período até hoje, guarda esse dashboard na galeria financeira e deixa a lista limpa para o próximo mês. Se responder “Não”, nada muda.'],
+['Onde vejo os meses que já fechei?','No botão “Galeria financeira”, ao lado de “Fechar o mês”. Lá ficam os dashboards de todos os meses fechados e você pode abrir ou excluir cada um.']]],
+['Trabalho',[
+['Como mudo o tempo do bloco de foco?','No cartão “Bloco de foco”, digite os minutos desejados (de 1 a 240) e clique em “Definir”, ou use os atalhos de tempo. O valor fica salvo para as próximas vezes.'],
+['Como apago todas as tarefas de uma vez?','Use o botão “Limpar” em “Tarefas de hoje”. O Organix pede confirmação, remove as tarefas atuais e deixa a lista livre para novas tarefas. O que você já concluiu continua aparecendo no resumo do dia.']]],
+['Alimentação',[
+['Como registro minha rotina alimentar do dia?','Adicione cada refeição com nome e horário, marque as que já fez e clique em “Salvar rotina do dia”. Para rever dias anteriores, abra o “Registro alimentar diário”, escolha o dia na semana e veja os registros daquele dia.'],
+['Como registro quanta água bebi?','Digite a quantidade em litros no campo de água (por exemplo, 1,5). Você também define a sua meta diária no campo “Minha meta diária”, em vez de usar um valor fixo. A barra mostra o quanto você já atingiu dessa meta, e você pode digitar mais que ela se beber mais.']]],
+['Academia',[
+['Como monto meu treino?','Crie uma pasta para cada treino, dê um nome a ela e escolha o dia da semana. Se mudar de ideia, troque o dia direto na própria pasta, na caixa ao lado do nome. Dentro da pasta, adicione exercícios com nome, séries, repetições, peso e músculo, e adicione cardio com tipo e minutos. O conjunto das pastas é o seu treino.'],
+['Por que o treino muda de um dia para o outro?','Depois da meia-noite, o “Treino de hoje” mostra a pasta do novo dia da semana. Assim, você sempre vê o treino que deve fazer hoje, e não o do dia anterior.'],
+['Onde vejo os treinos que já fiz?','Na “Galeria de treinos”. Cada dia em que você marcou algum exercício ou cardio como feito fica registrado ali, com o que foi realizado.']]],
+['Problemas comuns',[
+['Meus registros sumiram. O que pode ter acontecido?','Os registros ficam guardados no navegador. Eles podem não aparecer se você estiver em outro navegador, outro aparelho ou aba anônima, ou se os dados do site foram limpos nas configurações do navegador.'],
+['Uma seção está embaçada com um cadeado. Por quê?','Essa seção faz parte do plano Premium. Clique em “Ver planos” para assinar e liberar tudo.']]]
+];
+const faq=$('#faq');
+function render(){
+  const b=$('#busca').value.trim().toLowerCase();let n=0,h='';
+  Q.forEach(([cat,qs])=>{
+    const f=qs.filter(([p,r])=>!b||(p+' '+r+' '+cat).toLowerCase().includes(b));
+    if(!f.length)return;n+=f.length;
+    h+=`<h2>${esc(cat)}</h2>`+f.map(([p,r])=>`<details${b?' open':''}><summary>${esc(p)}</summary><div class="resp">${esc(r)}</div></details>`).join('');
+  });
+  faq.innerHTML=n?h:'<p class="vazio-msg">Nenhuma pergunta encontrada. Tente outra palavra.</p>';
+}
+$('#busca').addEventListener('input',render);render();
+})();
+</script>

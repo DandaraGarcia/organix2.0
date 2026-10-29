@@ -1,0 +1,6 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Entrar | Organix</title>
+<body class="auth"><form class="card" id="f"><h1>Entrar</h1><p class="mut">Bem-vindo de volta ao Organix.</p>
+<label for="e">E-mail</label><input id="e" type="email" placeholder="nome@email.com" required>
+<label for="s">Senha</label><input id="s" type="password" required>
+<button class="btn verde">Entrar</button><p class="mut" style="margin-top:14px;text-align:center">Ainda não tem conta? <a href="cadastro.html"><u>Cadastre-se</u></a></p></form>
+<script>f.onsubmit=e=>{e.preventDefault();localStorage.logado='1';localStorage.nome=localStorage.nome||document.getElementById('e').value.split('@')[0];localStorage.plano=localStorage.plano||'gratuito';location.href='app.html'}</script>

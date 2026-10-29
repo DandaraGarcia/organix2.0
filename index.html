@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organix | Sua rotina, organizada com inteligência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* CORES E FONTES: mude aqui e o site inteiro muda (preto, roxo e rosa claro) */
+:root{
+  --bg:#0B0A10; --s1:#15131F; --s2:#1C1930; --line:rgba(167,139,250,.2); --muted:#A59FBF; --txt:#F4F2FA;
+  --roxo:#8B5CF6; --roxo-d:#7C3AED; --roxo-l:#A78BFA; --rosa:#F9A8D4; --rosa-d:#1A0B1F;
+  --titulo:"Bricolage Grotesque",system-ui,sans-serif; --texto:"DM Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{font-family:var(--texto);color:var(--txt);background:var(--bg);line-height:1.6;font-size:17px}
+h1,h2,h3{font-family:var(--titulo);line-height:1.15}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.btn{display:inline-block;padding:12px 22px;border-radius:12px;font-weight:500;border:1.5px solid var(--line);background:var(--s2);color:var(--txt);transition:transform .15s,box-shadow .2s,border-color .2s}
+.btn:hover{transform:translateY(-2px);border-color:var(--roxo-l)}
+.btn.rosa{background:var(--rosa);border-color:var(--rosa);color:var(--rosa-d);font-weight:700}
+.btn.rosa:hover{box-shadow:0 8px 28px rgba(249,168,212,.35)}
+.btn:focus-visible,a:focus-visible{outline:3px solid var(--rosa);outline-offset:3px}
+
+/* TOPO */
+header{border-bottom:1px solid var(--line);background:rgba(11,10,16,.85);backdrop-filter:blur(10px);position:sticky;top:0;z-index:5}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
+.logo{font-family:var(--titulo);font-weight:700;font-size:22px;display:flex;align-items:center;gap:10px}
+.logo b{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--roxo),var(--rosa));display:inline-block}
+nav{display:flex;gap:24px;font-size:15px;color:var(--muted)}
+nav a:hover{color:var(--rosa)}
+.topo-botoes{display:flex;gap:8px}
+.topo-botoes .btn{padding:8px 16px;font-size:15px}
+
+/* HERO */
+.hero{padding:88px 0;background:radial-gradient(800px 500px at 80% 0,rgba(139,92,246,.4),transparent 65%),radial-gradient(600px 400px at 0 100%,rgba(249,168,212,.12),transparent 60%),var(--bg)}
+.hero .wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(36px,5.4vw,60px);font-weight:700;margin-bottom:18px;letter-spacing:-.02em}
+.hero p{color:var(--muted);max-width:46ch;margin-bottom:30px}
+.hero .acoes{display:flex;gap:12px;flex-wrap:wrap}
+.cartao{background:rgba(21,19,31,.9);border:1px solid rgba(167,139,250,.35);border-radius:22px;padding:22px;box-shadow:0 0 0 1px rgba(249,168,212,.08),0 30px 80px rgba(139,92,246,.35)}
+.cartao-topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tag{font-size:13px;padding:3px 11px;border-radius:20px;background:rgba(139,92,246,.22);color:#DDD1FF;border:1px solid rgba(167,139,250,.3)}
+.tarefa{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;background:var(--s2);border:1px solid var(--line);margin-bottom:8px;font-size:15px}
+.tarefa span:last-child{margin-left:auto;color:var(--muted);font-size:13px}
+.ok{width:19px;height:19px;border-radius:50%;background:linear-gradient(135deg,var(--roxo),var(--rosa));flex:none;box-shadow:0 0 12px rgba(139,92,246,.6)}
+.vazio{width:19px;height:19px;border-radius:50%;border:2px solid var(--muted);flex:none}
+.barra{height:8px;background:#2A2646;border-radius:4px;margin:14px 0}
+.barra div{height:8px;width:60%;background:linear-gradient(90deg,var(--roxo),var(--rosa));border-radius:4px}
+.dica{background:rgba(249,168,212,.12);border:1px solid rgba(249,168,212,.3);color:var(--rosa);border-radius:12px;padding:11px 13px;font-size:14px}
+
+/* SEÇÕES */
+section{padding:80px 0}
+section>.wrap>h2{font-size:clamp(26px,3.5vw,38px);margin-bottom:8px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin-bottom:38px;max-width:56ch}
+.grade{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{border-radius:18px;padding:24px;border:1px solid var(--line);transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:rgba(167,139,250,.5)}
+.card h3{font-size:19px;margin-bottom:6px}
+.card p{font-size:15px;color:var(--muted)}
+.c-verde{background:linear-gradient(150deg,#2B1B66,var(--s1))}
+.c-rosa{background:linear-gradient(150deg,#4A1F52,var(--s1))}
+.c-azul{background:linear-gradient(150deg,#22164A,var(--s1))}
+.c-amarelo{background:linear-gradient(150deg,#3A2358,#2A1A3A)}
+
+/* COMO FUNCIONA */
+#como{background:var(--s1);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.passo{border-left:3px solid var(--roxo);padding-left:16px}
+.passo b{font-family:var(--titulo);font-size:15px;color:var(--rosa)}
+.passo h3{font-size:18px;margin:2px 0 4px}
+.passo p{font-size:15px;color:var(--muted)}
+
+/* PLANOS */
+.plano{border:1px solid var(--line);background:var(--s1);border-radius:20px;padding:28px;display:flex;flex-direction:column}
+.plano.destaque{border:2px solid var(--rosa);background:linear-gradient(160deg,#2A1650,var(--s1) 70%);box-shadow:0 0 60px rgba(249,168,212,.18)}
+.plano .preco{font-family:var(--titulo);font-size:34px;font-weight:700;margin:6px 0 12px}
+.plano ul{list-style:none;padding:0;margin-bottom:22px;font-size:15px;color:var(--muted);flex:1}
+.plano li{padding:4px 0}
+.plano li::before{content:"✓";color:var(--rosa);margin-right:8px;font-weight:700}
+.selo{align-self:flex-start;background:var(--rosa);color:var(--rosa-d);font-size:13px;font-weight:700;padding:2px 11px;border-radius:20px;margin-bottom:8px}
+
+/* CHAMADA FINAL E RODAPÉ */
+.final{background:radial-gradient(600px 300px at 50% 0,rgba(249,168,212,.22),transparent 70%),linear-gradient(135deg,#2E1065,#4C1D95);padding:68px 0;text-align:center;border-top:1px solid var(--line)}
+.final h2{font-size:clamp(26px,3.5vw,38px);margin-bottom:8px}
+.final p{margin-bottom:24px;color:#E4DAFF}
+.final .btn{background:var(--rosa);border-color:var(--rosa);color:var(--rosa-d);font-weight:700}
+footer{background:#07060B;color:var(--muted);padding:28px 0;font-size:14px;border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* CELULAR: telas menores empilham as colunas */
+@media (max-width:860px){
+  nav{display:none}
+  .hero .wrap,.g4,.g3{grid-template-columns:1fr}
+  .hero{padding:52px 0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#"><b></b>Organix</a>
+    <nav aria-label="Principal">
+      <a href="#beneficios">Benefícios</a>
+      <a href="#como">Como funciona</a>
+      <a href="#planos">Planos</a>
+    </nav>
+    <div class="topo-botoes">
+      <a class="btn" href="entrar.html">Entrar</a>
+      <a class="btn rosa" href="cadastro.html">Começar grátis</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Sua rotina, organizada com inteligência</h1>
+      <p>O Organix monta um planejamento só seu para você criar hábitos consistentes, procrastinar menos e manter o foco no que importa.</p>
+      <div class="acoes">
+        <a class="btn rosa" href="cadastro.html">Criar minha rotina</a>
+        <a class="btn" href="#como">Ver como funciona</a>
+      </div>
+    </div>
+    <div class="cartao" aria-label="Exemplo da rotina do dia">
+      <div class="cartao-topo"><b>Sua rotina de hoje</b><span class="tag">3 de 5 feitas</span></div>
+      <div class="tarefa"><i class="ok"></i>Treino leve<span>07:00</span></div>
+      <div class="tarefa"><i class="ok"></i>Bloco de estudo<span>09:00</span></div>
+      <div class="tarefa"><i class="ok"></i>Trabalho focado<span>14:00</span></div>
+      <div class="tarefa"><i class="vazio"></i>Tempo para mim<span>19:00</span></div>
+      <div class="barra"><div></div></div>
+      <div class="dica">Dica da IA: seu melhor horário de foco é às 09:00. Quer proteger esse horário?</div>
+    </div>
+  </div>
+</div>
+
+<section id="beneficios">
+  <div class="wrap">
+    <h2>Feito para quem tem muita coisa na cabeça</h2>
+    <p class="sub">Para jovens de 18 a 30 anos que dividem o dia entre estudo, trabalho, saúde e vida pessoal.</p>
+    <div class="grade g4">
+      <div class="card c-verde"><h3>Mais produtividade</h3><p>Organize estudos e trabalho sem se perder no meio do dia.</p></div>
+      <div class="card c-rosa"><h3>Menos estresse</h3><p>Procrastine menos e pare de se sentir sobrecarregado.</p></div>
+      <div class="card c-azul"><h3>Clareza de metas</h3><p>Saiba o que é prioridade em cada dia.</p></div>
+      <div class="card c-amarelo"><h3>Equilíbrio</h3><p>Estudos, trabalho, saúde e lazer, cada um no seu lugar.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="como">
+  <div class="wrap">
+    <h2>Como funciona</h2>
+    <p class="sub">Em poucos minutos você sai do zero para uma rotina montada.</p>
+    <div class="grade g4">
+      <div class="passo"><b>Passo 1</b><h3>Conte sua rotina</h3><p>Responda a perguntas rápidas sobre seus horários e objetivos.</p></div>
+      <div class="passo"><b>Passo 2</b><h3>Receba seu plano</h3><p>A IA monta uma rotina personalizada para você.</p></div>
+      <div class="passo"><b>Passo 3</b><h3>Acompanhe seus hábitos</h3><p>Marque o que fez e veja seu progresso dia a dia.</p></div>
+      <div class="passo"><b>Passo 4</b><h3>Evolua com feedback</h3><p>Receba ajustes e conteúdo para manter a motivação.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="planos">
+  <div class="wrap">
+    <h2>Escolha seu plano</h2>
+    <p class="sub">Comece grátis. Assine o Premium quando quiser desbloquear tudo.</p>
+    <div class="grade g3">
+      <div class="plano">
+        <h3>Gratuito</h3><div class="preco">R$ 0</div>
+        <ul><li>Início com Meu dia e progresso da semana</li><li>Agenda de entregas</li><li>Perguntas sobre como usar o site</li></ul>
+        <a class="btn" href="cadastro.html">Criar conta grátis</a>
+      </div>
+      <div class="plano destaque">
+        <span class="selo">Mais popular</span>
+        <h3>Premium</h3><div class="preco">R$ 19/mês</div>
+        <ul><li>Tudo do plano gratuito</li><li>Registro do dia com calendário e resumo diário</li><li>Finanças com fechamento do mês e galeria</li><li>Rotinas de trabalho, alimentação e academia</li></ul>
+        <a class="btn rosa" href="cadastro.html?plano=premium">Assinar Premium</a>
+      </div>
+      <div class="plano">
+        <h3>Mentoria</h3><div class="preco">Sob consulta</div>
+        <ul><li>Tudo do Premium</li><li>Acompanhamento individual com especialistas</li></ul>
+        <a class="btn" href="#contato">Falar com a equipe</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="wrap">
+    <h2>Pronto para organizar sua vida?</h2>
+    <p>Comece grátis e monte sua primeira rotina em minutos.</p>
+    <a class="btn" href="cadastro.html">Criar conta grátis</a>
+  </div>
+</div>
+</main>
+
+<footer id="contato">
+  <div class="wrap">
+    <span>Organix</span>
+    <span>Sobre · Blog · Parceiros · Contato</span>
+    <span>Termos e privacidade</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Alimentação | Organix</title>
+<body data-app data-premium><div class="app"><aside id="menu"></aside><main>
+<div class="topo"><h1>Rotina alimentar</h1><button class="btn" id="reg">Registro alimentar diário</button></div>
+<div class="conteudo"><div class="grid g2" style="align-items:start">
+<div><ul class="lista" id="lista"></ul>
+<form class="card form" id="f" style="grid-template-columns:2fr 1fr auto"><div><label for="n">Refeição ou alimento</label><input id="n" maxlength="50" placeholder="Ex.: Café da manhã" required></div><div><label for="h">Horário</label><input id="h" type="time" required></div><button class="btn verde">Adicionar</button></form>
+<button class="btn rosa" id="salvar" style="width:100%">Salvar rotina do dia</button></div>
+<div class="card" style="display:grid;place-items:center;gap:10px"><div class="anel"><span id="pct">0%</span></div><span class="mut">da rotina alimentar de hoje cumprida</span></div></div>
+<div class="card c2" style="margin-top:16px"><h2>Água</h2><div class="form" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-bottom:14px"><div><label for="mt">Minha meta diária (litros)</label><input id="mt" type="text" inputmode="decimal" placeholder="Ex.: 2,5" autocomplete="off"></div><div><label for="ag">Quanto você bebeu hoje (litros)</label><input id="ag" type="text" inputmode="decimal" placeholder="Ex.: 1,5" autocomplete="off"></div></div><div class="barra"><div id="bar"></div></div><b id="lt" style="display:block;margin-top:8px"></b></div>
+<section class="card" id="painel" hidden style="margin-top:16px"><h2>Registro alimentar diário</h2>
+<div class="linha"><button class="btn peq" id="sa" aria-label="Semana anterior">‹ Semana anterior</button><b id="st"></b><button class="btn peq" id="sp" aria-label="Próxima semana">Próxima semana ›</button></div>
+<div class="sm" id="sm"></div><div id="det"></div></section>
+</div></main></div><script src="app.js"></script><script>
+(()=>{
+let A=load('alim',{});A.dias=A.dias||{};if(!(A.meta>0))A.meta=2;
+function carrega(){
+  const d=hoje();
+  if(!A.hoje||A.hoje.data!==d){
+    const a=A.hoje;
+    /* o dia anterior não é perdido: se algo foi feito, ele é salvo sozinho */
+    if(a&&(a.itens.some(x=>x.ok)||a.agua>0)&&!A.dias[a.data])A.dias[a.data]={itens:a.itens,agua:a.agua,meta:A.meta};
+    A.hoje={data:d,itens:(a?a.itens:[]).map(x=>({...x,ok:false})),agua:0};save('alim',A);
+  }
+}
+carrega();
+const sv=()=>save('alim',A);
+const num=v=>{const n=parseFloat(String(v).replace(',','.'));return isFinite(n)&&n>=0?Math.min(n,20):0};
+function ver(){
+  const it=A.hoje.itens.sort((a,b)=>(a.h||'').localeCompare(b.h||'')),n=it.filter(x=>x.ok).length,p=it.length?Math.round(n/it.length*100):0;
+  $('#lista').innerHTML=it.length?it.map(x=>`<li class="${x.ok?'feito':''}" data-id="${x.id}"><label><input type="checkbox" ${x.ok?'checked':''}><span class="t">${esc(x.n)}</span></label><span class="h">${esc(x.h||'')}</span><button class="x" aria-label="Remover ${esc(x.n)}">×</button></li>`).join(''):'<li class="vazio-msg">Nenhuma refeição. Adicione a primeira abaixo.</li>';
+  $('#pct').textContent=p+'%';document.querySelector('.anel').style.setProperty('--p',p);
+}
+function agua(){const a=A.hoje.agua;$('#bar').style.width=Math.min(100,a/A.meta*100)+'%';$('#lt').textContent=litros(a)+' de '+litros(A.meta)+(a>=A.meta?' · meta atingida!':'')}
+const fmtN=n=>n?String(n).replace('.',','):'';
+$('#mt').addEventListener('input',e=>{const n=num(e.target.value);if(n>0){A.meta=n;sv();agua()}});
+$('#mt').addEventListener('blur',e=>{e.target.value=fmtN(A.meta)});
+$('#lista').addEventListener('change',e=>{const x=A.hoje.itens.find(y=>y.id===e.target.closest('li').dataset.id);if(x){x.ok=e.target.checked;sv();ver()}});
+$('#lista').addEventListener('click',e=>{const b=e.target.closest('.x');if(!b)return;A.hoje.itens=A.hoje.itens.filter(y=>y.id!==b.closest('li').dataset.id);sv();ver();toast('Item removido')});
+$('#f').onsubmit=e=>{e.preventDefault();const n=$('#n').value.trim(),h=$('#h').value;if(!n||!h)return;A.hoje.itens.push({id:uid(),n,h,ok:false});sv();ver();e.target.reset();$('#n').focus()};
+$('#ag').addEventListener('input',e=>{A.hoje.agua=num(e.target.value);sv();agua()});
+$('#ag').addEventListener('blur',e=>{e.target.value=A.hoje.agua?String(A.hoje.agua).replace('.',','):''});
+$('#salvar').onclick=()=>{
+  const h=A.hoje;if(!h.itens.length&&!h.agua){toast('Adicione refeições ou a água de hoje antes de salvar');return}
+  A.dias[h.data]={itens:h.itens.map(x=>({...x})),agua:h.agua,meta:A.meta};sv();toast('Rotina alimentar de hoje salva');if(!$('#painel').hidden)semana();
+};
+
+/* registro alimentar diário: semana + registros do dia na vertical */
+const inicioSem=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-x.getDay());return x};
+let ini=inicioSem(new Date()),selD=hoje();
+function semana(){
+  const ds=[...Array(7)].map((_,i)=>{const x=new Date(ini);x.setDate(x.getDate()+i);return x});
+  $('#st').textContent=fmt(key(ds[0])).slice(0,5)+' a '+fmt(key(ds[6]));
+  $('#sm').innerHTML=ds.map(x=>{const k=key(x);return `<button type="button" data-k="${k}" class="${k===selD?'on':''}${k===hoje()?' hj':''}"><small>${x.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</small><b>${x.getDate()}</b>${A.dias[k]?'<i></i>':''}</button>`}).join('');
+  const r=A.dias[selD];
+  $('#det').innerHTML=`<h3 style="margin-bottom:8px">${esc(diaLongo(selD))}</h3>`+(r?(r.itens.length?ulRo(r.itens.slice().sort((a,b)=>(a.h||'').localeCompare(b.h||'')).map(x=>liRo(x.ok,x.n,x.h))):'<p class="mut">Nenhuma refeição neste registro.</p>')+`<p class="mut" style="margin-top:6px">Água: ${litros(r.agua||0)} de ${litros(r.meta||2)}</p>`:`<p class="vazio-msg">Sem registro salvo neste dia.${selD===hoje()?' Use “Salvar rotina do dia” para guardar o de hoje.':''}</p>`);
+}
+$('#reg').onclick=()=>{const p=$('#painel');p.hidden=!p.hidden;if(!p.hidden){semana();p.scrollIntoView({behavior:'smooth',block:'start'})}};
+$('#sa').onclick=()=>{ini.setDate(ini.getDate()-7);semana()};
+$('#sp').onclick=()=>{ini.setDate(ini.getDate()+7);semana()};
+$('#sm').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b){selD=b.dataset.k;semana()}});
+$('#ag').value=fmtN(A.hoje.agua);$('#mt').value=fmtN(A.meta);
+ver();agua();novoDia(()=>location.reload());
+})();
+</script>

@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Agenda | Organix</title>
+<body data-app><div class="app"><aside id="menu"></aside><main><h1>Agenda de entregas</h1><div class="conteudo">
+<form class="card form" id="f" style="grid-template-columns:2fr 1fr auto"><div><label for="t">Trabalho</label><input id="t" maxlength="60" required></div><div><label for="d">Entrega</label><input id="d" type="date" required></div><button class="btn verde">Adicionar</button></form>
+<div class="linha" style="margin-bottom:14px;align-items:end;flex-wrap:wrap"><span class="mut" id="tot"></span><div style="width:min(280px,100%)"><label for="ord" style="margin-top:0">Ordenar por</label><select id="ord"><option value="menor-tempo">Menor tempo de entrega</option><option value="maior-tempo">Maior tempo de entrega</option><option value="maior-prog">Maior progresso</option><option value="menor-prog">Menor progresso</option><option value="az">Ordem alfabética</option></select></div></div>
+<div class="grid" id="lista"></div></div></main></div><script src="app.js"></script><script>
+(()=>{
+let E=load('entregas',[]);
+const az=(a,b)=>a.t.localeCompare(b.t,'pt-BR',{sensitivity:'base'});
+const ORD={'menor-tempo':(a,b)=>a.d.localeCompare(b.d)||az(a,b),'maior-tempo':(a,b)=>b.d.localeCompare(a.d)||az(a,b),'maior-prog':(a,b)=>b.p-a.p||az(a,b),'menor-prog':(a,b)=>a.p-b.p||az(a,b),'az':az};
+let ord=load('entregas_ord','menor-tempo');if(!ORD[ord])ord='menor-tempo';
+$('#ord').value=ord;
+const tag=e=>{const f=diasAte(e.d);
+  if(e.p>=100)return '<span class="tag">concluída</span>';
+  if(f<0)return `<span class="tag rosa">atrasada há ${-f} dia${-f>1?'s':''}</span>`;
+  if(f===0)return '<span class="tag rosa">vence hoje</span>';
+  return `<span class="tag ${f<=7?'rosa':''}">em ${f} dia${f>1?'s':''}</span>`};
+function ver(){
+  $('#tot').textContent=E.length?`${E.length} entrega${E.length>1?'s':''} registrada${E.length>1?'s':''}`:'';
+  $('#lista').innerHTML=E.length?E.slice().sort(ORD[ord]).map(e=>`<div class="card" data-id="${e.id}"><div class="linha"><b style="overflow-wrap:anywhere">${esc(e.t)}</b><span style="display:flex;gap:8px;align-items:center">${tag(e)}<button class="x" aria-label="Remover ${esc(e.t)}">×</button></span></div><p class="mut" style="margin-bottom:8px">Entrega em ${fmt(e.d)}</p><div class="linha"><div class="barra"><div style="width:${e.p}%"></div></div><b class="pct">${e.p}%</b></div><input type="range" min="0" max="100" value="${e.p}" aria-label="Progresso de ${esc(e.t)}"></div>`).join(''):'<p class="vazio-msg">Nenhuma entrega registrada. Adicione a primeira no formulário acima.</p>';
+}
+const acha=el=>E.find(x=>x.id===el.closest('.card').dataset.id);
+$('#lista').addEventListener('input',e=>{if(e.target.type!=='range')return;const c=e.target.closest('.card'),x=acha(e.target);if(!x)return;x.p=+e.target.value;c.querySelector('.barra div').style.width=x.p+'%';c.querySelector('.pct').textContent=x.p+'%';save('entregas',E)});
+$('#lista').addEventListener('change',e=>{if(e.target.type==='range'){save('entregas',E);ver()}});
+$('#lista').addEventListener('click',async e=>{const b=e.target.closest('.x');if(!b)return;const x=acha(b);if(x&&await ask(`Remover a entrega "${x.t}"?`)){E=E.filter(y=>y.id!==x.id);save('entregas',E);ver();toast('Entrega removida')}});
+$('#ord').onchange=e=>{ord=e.target.value;save('entregas_ord',ord);ver()};
+$('#f').onsubmit=e=>{e.preventDefault();const t=$('#t').value.trim();if(!t||!$('#d').value)return;E.push({id:uid(),t,d:$('#d').value,p:0});save('entregas',E);e.target.reset();ver();toast('Entrega adicionada e salva')};
+ver();novoDia(ver);
+})();
+</script>

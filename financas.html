@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Finanças | Organix</title>
+<body data-app data-premium><div class="app"><aside id="menu"></aside><main>
+<div class="topo"><h1>Rotina financeira</h1><button class="btn rosa" id="fechar">Fechar o mês</button><button class="btn" id="gal">Galeria financeira</button></div>
+<div class="conteudo">
+<div class="grid g3"><div class="card c2"><span class="mut">Saldo do mês</span><div class="num" id="sd"></div></div><div class="card c1"><span class="mut">Receitas</span><div class="num" id="rc"></div></div><div class="card c3"><span class="mut">Gastos</span><div class="num" id="gs"></div></div></div>
+<form class="card form" id="f" style="grid-template-columns:1.2fr 1.6fr 1fr 1fr auto"><div><label for="nm">Nome <span id="cn">0/30</span></label><input id="nm" maxlength="30" required></div><div><label for="ds">Descrição</label><input id="ds" maxlength="80"></div><div><label for="vl">Valor</label><input id="vl" type="number" step="0.01" min="0.01" required></div><div><label for="tp">Tipo</label><select id="tp"><option value="r">Receita</option><option value="g">Gasto</option></select></div><button class="btn verde">Adicionar</button></form>
+<div class="linha"><h2 style="margin:0">Registros do mês</h2><button class="btn peq perigo" id="limpa">Apagar todos</button></div>
+<ul class="lista" id="l"></ul>
+<section class="card" id="galeria" hidden style="margin-top:20px"><h2>Galeria financeira</h2><div class="grid g2" id="gl" style="margin:0"></div></section>
+</div></main></div><script src="app.js"></script><script>
+(()=>{
+let F=load('fin',{reg:[],gal:[]});F.reg=F.reg||[];F.gal=F.gal||[];
+const sv=()=>save('fin',F);
+const soma=(a,t)=>a.filter(x=>x.tipo===t).reduce((s,x)=>s+x.valor,0);
+const cor=t=>t==='r'?'#A78BFA':'#F9A8D4';
+const mesAno=k=>cap(dt(k).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}));
+function ver(){
+  const r=soma(F.reg,'r'),g=soma(F.reg,'g');
+  $('#rc').textContent=br(r);$('#gs').textContent=br(g);$('#sd').textContent=br(r-g);
+  $('#l').innerHTML=F.reg.length?F.reg.map(x=>`<li data-id="${x.id}"><span class="t"><b>${esc(x.nome)}</b>${x.desc?` <small>${esc(x.desc)}</small>`:''}</span><span class="h">${fmt(x.data).slice(0,5)}</span><b style="color:${cor(x.tipo)};white-space:nowrap">${x.tipo==='r'?'+':'-'}${br(x.valor)}</b><button class="x" aria-label="Remover ${esc(x.nome)}">×</button></li>`).join(''):'<li class="vazio-msg">Nenhum registro ainda. Adicione sua primeira receita ou gasto acima.</li>';
+}
+function dash(g){
+  const R=soma(g.reg,'r'),G=soma(g.reg,'g'),max=Math.max(R,G,1);
+  const maior=t=>g.reg.filter(x=>x.tipo===t).sort((a,b)=>b.valor-a.valor)[0];
+  const mr=maior('r'),mg=maior('g');
+  return `<h2>Dashboard de ${esc(mesAno(g.fim))}</h2><p class="mut" style="margin-bottom:14px">Período: ${fmt(g.inicio)} a ${fmt(g.fim)} · ${g.reg.length} lançamento${g.reg.length>1?'s':''}</p>
+  <div class="grid g3"><div class="card c2"><span class="mut">Saldo</span><div class="num">${br(R-G)}</div></div><div class="card c1"><span class="mut">Receitas</span><div class="num">${br(R)}</div></div><div class="card c3"><span class="mut">Gastos</span><div class="num">${br(G)}</div></div></div>
+  <div class="card" style="margin-bottom:16px"><h3>Receitas x gastos</h3><div class="dash-bar"><span>Receitas</span><div class="barra"><div style="width:${R/max*100}%"></div></div><b>${br(R)}</b></div><div class="dash-bar"><span>Gastos</span><div class="barra"><div style="width:${G/max*100}%"></div></div><b>${br(G)}</b></div>
+  <p class="mut" style="margin-top:10px">${mr?`Maior receita: ${esc(mr.nome)} (${br(mr.valor)}). `:''}${mg?`Maior gasto: ${esc(mg.nome)} (${br(mg.valor)}).`:''}</p></div>
+  <h3 style="margin-bottom:8px">Lançamentos</h3>${ulRo(g.reg.map(x=>`<li><span class="t">${esc(x.nome)}${x.desc?` <small>${esc(x.desc)}</small>`:''}</span><span class="h">${fmt(x.data).slice(0,5)}</span><b style="color:${cor(x.tipo)};white-space:nowrap">${x.tipo==='r'?'+':'-'}${br(x.valor)}</b></li>`),'nb')}`;
+}
+function galeria(){
+  $('#gl').innerHTML=F.gal.length?F.gal.map(g=>{const R=soma(g.reg,'r'),G=soma(g.reg,'g');return `<div class="card c4" data-id="${g.id}"><div class="linha"><b>${esc(mesAno(g.fim))}</b><button class="x" data-a="del" aria-label="Excluir dashboard de ${esc(mesAno(g.fim))}">×</button></div><p class="mut">${fmt(g.inicio)} a ${fmt(g.fim)}</p><div class="num" style="margin:6px 0">${br(R-G)}</div><p class="mut" style="margin-bottom:12px">Receitas ${br(R)} · Gastos ${br(G)}</p><button class="btn peq" data-a="ver">Ver dashboard</button></div>`}).join(''):'<p class="vazio-msg" style="grid-column:1/-1">Nenhum mês fechado ainda. Use “Fechar o mês” para guardar o dashboard aqui.</p>';
+}
+$('#nm').oninput=e=>$('#cn').textContent=e.target.value.length+'/30';
+$('#f').onsubmit=e=>{e.preventDefault();const nome=$('#nm').value.trim(),v=parseFloat($('#vl').value);if(!nome||!(v>0))return;
+  F.reg.unshift({id:uid(),nome:nome.slice(0,30),desc:$('#ds').value.trim(),valor:Math.round(v*100)/100,tipo:$('#tp').value,data:hoje()});sv();e.target.reset();$('#cn').textContent='0/30';ver();toast('Registro adicionado')};
+$('#l').addEventListener('click',e=>{const b=e.target.closest('.x');if(!b)return;F.reg=F.reg.filter(x=>x.id!==b.closest('li').dataset.id);sv();ver();toast('Registro removido')});
+$('#limpa').onclick=async()=>{if(!F.reg.length){toast('Não há registros para apagar');return}if(await ask('Apagar todos os registros deste mês? Essa ação não pode ser desfeita.')){F.reg=[];sv();ver();toast('Registros apagados')}};
+$('#fechar').onclick=async()=>{
+  if(!F.reg.length){toast('Não há registros para fechar neste mês');return}
+  if(!await ask('Você tem certeza que deseja encerrar as finanças desse mês?'))return;
+  const reg=F.reg.slice().sort((a,b)=>a.data.localeCompare(b.data));
+  const g={id:uid(),inicio:reg[0].data,fim:hoje(),reg};
+  F.gal.unshift(g);F.reg=[];sv();ver();galeria();toast('Mês encerrado e salvo na galeria financeira');
+  modal(dash(g),true);
+};
+$('#gal').onclick=()=>{const s=$('#galeria');s.hidden=!s.hidden;if(!s.hidden){galeria();s.scrollIntoView({behavior:'smooth',block:'start'})}};
+$('#gl').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const g=F.gal.find(x=>x.id===b.closest('.card').dataset.id);if(!g)return;
+  if(b.dataset.a==='ver')modal(dash(g),true);
+  else if(await ask(`Excluir o dashboard de ${mesAno(g.fim)} da galeria?`)){F.gal=F.gal.filter(x=>x.id!==g.id);sv();galeria();toast('Dashboard excluído')}
+});
+ver();
+})();
+</script>

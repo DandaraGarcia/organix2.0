@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Academia | Organix</title>
+<body data-app data-premium><div class="app"><aside id="menu"></aside><main>
+<div class="topo"><h1>Rotina de academia</h1><button class="btn" id="gal">Galeria de treinos</button></div>
+<div class="conteudo">
+<div class="grid g2" style="align-items:start"><div><h2 id="th">Treino de hoje</h2><div id="hoje"></div></div>
+<div class="card c3" style="display:grid;place-items:center;gap:10px"><div class="anel"><span id="pct">0%</span></div><span class="mut" id="cnt"></span></div></div>
+<section class="card" id="galeria" hidden style="margin-bottom:16px"><h2>Galeria de treinos</h2><div class="grid g2" id="gl" style="margin:0"></div></section>
+<h2>Meu treino</h2>
+<form class="card form" id="fp" style="grid-template-columns:2fr 1fr auto"><div><label for="pn">Nome da pasta</label><input id="pn" maxlength="40" placeholder="Ex.: Treino A, peito e tríceps" required></div><div><label for="pd">Dia da semana</label><select id="pd"></select></div><button class="btn verde">Criar pasta</button></form>
+<div id="pastas"></div>
+</div></main></div><script src="app.js"></script><script>
+(()=>{
+const SEM=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'],ORDEM=[1,2,3,4,5,6,0];
+const MUS=['quadríceps','glúteo','posteriores','panturrilha','lombar','abdômen','peito','costas','bíceps','tríceps','ombro','trapézio'];
+const CARDIO=[['esteira','Esteira'],['bicicleta','Bicicleta'],['escada','Escada'],['elíptico','Elíptico'],['outro','Outro']];
+let Tr=load('treino',{});Tr={pastas:[],feito:{},gal:{},...Tr};
+const sv=()=>save('treino',Tr);
+const abertas=new Set();
+const wd=()=>new Date().getDay();
+const hojeP=()=>Tr.pastas.filter(p=>p.dia===wd());
+const nomeC=c=>c.tipo==='outro'?(c.nome||'Cardio'):cap(c.tipo);
+const resEx=e=>`${e.s} × ${e.r}${e.p!=null&&e.p!==''?' · '+e.p+' kg':''}`;
+$('#pd').innerHTML=ORDEM.map(i=>`<option value="${i}"${i===wd()?' selected':''}>${SEM[i]}</option>`).join('');
+
+/* registra na galeria o que foi feito hoje (chamado ao marcar ou desmarcar) */
+function snap(){
+  const d=hoje(),ps=hojeP(),f=Tr.feito[d]||[],ex=[],ca=[];
+  ps.forEach(p=>{p.ex.forEach(e=>ex.push({n:e.n,s:e.s,r:e.r,p:e.p,m:e.m,ok:f.includes(e.id)}));p.ca.forEach(c=>ca.push({n:nomeC(c),desc:c.desc||'',min:c.min,ok:f.includes(c.id)}))});
+  if([...ex,...ca].some(x=>x.ok))Tr.gal[d]={pastas:ps.map(p=>p.nome),ex,ca};else delete Tr.gal[d];
+}
+function renderHoje(){
+  const ps=hojeP(),f=Tr.feito[hoje()]||[];
+  $('#th').textContent='Treino de hoje · '+SEM[wd()];
+  let tot=0,ok=0;
+  $('#hoje').innerHTML=ps.length?ps.map(p=>{
+    const li=(id,t,sub,tag,c)=>{tot++;const o=f.includes(id);if(o)ok++;return `<li class="${o?'feito':''}" data-id="${id}"><label><input type="checkbox" ${o?'checked':''}><span class="t"><b>${esc(t)}</b><small>${sub}</small></span></label><span class="tag ${c||''}">${esc(tag)}</span></li>`};
+    const ex=p.ex.map(e=>li(e.id,e.n,esc(resEx(e)),cap(e.m))).join(''),ca=p.ca.map(c=>li(c.id,nomeC(c),esc(c.min+' min'+(c.desc?' · '+c.desc:'')),'Cardio','rosa')).join('');
+    return `<div class="card" style="margin-bottom:12px"><h3 style="margin-bottom:10px">${esc(p.nome)}</h3>${ex||ca?`<ul class="lista" style="margin:0">${ex}${ca}</ul>`:'<p class="vazio-msg">Esta pasta ainda não tem exercícios. Adicione abaixo em “Meu treino”.</p>'}</div>`}).join(''):`<p class="vazio-msg">Nenhuma pasta de treino para ${SEM[wd()].toLowerCase()}. Crie uma pasta abaixo e escolha este dia da semana.</p>`;
+  const p=tot?Math.round(ok/tot*100):0;$('#pct').textContent=p+'%';document.querySelector('.anel').style.setProperty('--p',p);
+  $('#cnt').textContent=tot?`${ok} de ${tot} itens feitos hoje`:'Sem treino hoje';
+}
+function renderPastas(){
+  const ps=Tr.pastas.slice().sort((a,b)=>ORDEM.indexOf(a.dia)-ORDEM.indexOf(b.dia));
+  $('#pastas').innerHTML=ps.length?ps.map(p=>`<details class="card pasta" data-p="${p.id}"${abertas.has(p.id)?' open':''}><summary><span class="nm">${esc(p.nome)}</span><select class="dia-sel" data-a="dia" aria-label="Dia da semana da pasta ${esc(p.nome)}">${ORDEM.map(i=>`<option value="${i}"${i===p.dia?' selected':''}>${SEM[i]}</option>`).join('')}</select><button class="x" data-a="rp" aria-label="Remover pasta ${esc(p.nome)}">×</button></summary><div class="corpo">
+  <h3>Exercícios</h3>${p.ex.length?`<ul class="lista ro nb">${p.ex.map(e=>`<li><span class="t"><b>${esc(e.n)}</b><small>${esc(resEx(e))}</small></span><span class="tag">${esc(cap(e.m))}</span><button class="x" data-a="rex" data-id="${e.id}" aria-label="Remover ${esc(e.n)}">×</button></li>`).join('')}</ul>`:'<p class="mini" style="margin-bottom:8px">Nenhum exercício ainda.</p>'}
+  <form class="form" data-f="ex" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))"><div style="grid-column:span 2"><label>Nome do exercício</label><input name="n" maxlength="40" required placeholder="Ex.: Supino reto"></div><div><label>Séries</label><input name="s" type="number" min="1" max="50" required></div><div><label>Repetições</label><input name="r" maxlength="24" required placeholder="12 ou 12/10/8"></div><div><label>Peso (kg)</label><input name="p" type="number" min="0" step="0.5"></div><div><label>Músculo</label><select name="m" required>${MUS.map(m=>`<option value="${m}">${cap(m)}</option>`).join('')}</select></div><button class="btn verde">Adicionar exercício</button></form>
+  <h3>Cardio</h3>${p.ca.length?`<ul class="lista ro nb">${p.ca.map(c=>`<li><span class="t"><b>${esc(nomeC(c))}</b><small>${esc(c.min+' min'+(c.desc?' · '+c.desc:''))}</small></span><span class="tag rosa">Cardio</span><button class="x" data-a="rca" data-id="${c.id}" aria-label="Remover ${esc(nomeC(c))}">×</button></li>`).join('')}</ul>`:'<p class="mini" style="margin-bottom:8px">Nenhum cardio ainda.</p>'}
+  <form class="form" data-f="ca" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"><div><label>Cardio</label><select name="tipo">${CARDIO.map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select></div><div><label>Minutos</label><input name="min" type="number" min="1" max="600" required></div><div class="outro" hidden style="grid-column:1/-1"><label>Nome do cardio</label><input name="nome" maxlength="40" placeholder="Ex.: Pular corda"><label>Descrição</label><input name="desc" maxlength="120" placeholder="Ex.: 5 rounds de 3 minutos"></div><button class="btn verde">Adicionar cardio</button></form>
+  </div></details>`).join(''):'<p class="vazio-msg">Você ainda não criou nenhuma pasta. Crie a primeira acima para montar o seu treino.</p>';
+}
+function galeria(){
+  const ds=Object.keys(Tr.gal).sort().reverse();
+  $('#gl').innerHTML=ds.length?ds.map(d=>{const g=Tr.gal[d],it=[...g.ex,...g.ca],ok=it.filter(x=>x.ok).length;
+    return `<div class="card c4"><div class="linha"><b>${esc(diaLongo(d))}</b></div><p class="mut" style="margin-bottom:8px"><span class="tag rosa">${esc(g.pastas.join(', '))}</span> ${ok} de ${it.length} concluídos</p>${ulRo([...g.ex.map(e=>liRo(e.ok,e.n,resEx(e)+' · '+cap(e.m))),...g.ca.map(c=>liRo(c.ok,'Cardio: '+c.n,c.min+' min'))])}</div>`}).join(''):'<p class="vazio-msg" style="grid-column:1/-1">Nenhum treino registrado ainda. Marque os exercícios que você fizer em “Treino de hoje”.</p>';
+}
+const pasta=el=>Tr.pastas.find(p=>p.id===el.closest('[data-p]').dataset.p);
+$('#fp').onsubmit=e=>{e.preventDefault();const nome=$('#pn').value.trim();if(!nome)return;const p={id:uid(),nome,dia:+$('#pd').value,ex:[],ca:[]};Tr.pastas.push(p);abertas.add(p.id);sv();$('#pn').value='';renderHoje();renderPastas();toast('Pasta criada')};
+$('#hoje').addEventListener('change',e=>{
+  const li=e.target.closest('li');if(!li)return;const d=hoje(),f=Tr.feito[d]||[];
+  Tr.feito[d]=e.target.checked?[...new Set([...f,li.dataset.id])]:f.filter(x=>x!==li.dataset.id);snap();sv();renderHoje();if(!$('#galeria').hidden)galeria();
+});
+const P_=$('#pastas');
+P_.addEventListener('toggle',e=>{const d=e.target.closest('details');if(!d)return;d.open?abertas.add(d.dataset.p):abertas.delete(d.dataset.p)},true);
+P_.addEventListener('click',async e=>{
+  const b=e.target.closest('.x');if(!b)return;e.preventDefault();const p=pasta(b);if(!p)return;
+  if(b.dataset.a==='rp'){if(await ask(`Remover a pasta "${p.nome}" e tudo o que há nela?`)){Tr.pastas=Tr.pastas.filter(x=>x.id!==p.id);sv();renderHoje();renderPastas();toast('Pasta removida')}}
+  else if(b.dataset.a==='rex'){p.ex=p.ex.filter(x=>x.id!==b.dataset.id);sv();renderHoje();renderPastas()}
+  else if(b.dataset.a==='rca'){p.ca=p.ca.filter(x=>x.id!==b.dataset.id);sv();renderHoje();renderPastas()}
+});
+P_.addEventListener('change',e=>{
+  if(e.target.dataset.a==='dia'){const p=pasta(e.target);if(p){p.dia=+e.target.value;sv();renderHoje();renderPastas();toast(`“${p.nome}” agora é o treino de ${SEM[p.dia].toLowerCase()}`)}return}
+  if(e.target.name==='tipo'){const o=e.target.closest('form').querySelector('.outro');o.hidden=e.target.value!=='outro'}});
+P_.addEventListener('submit',e=>{
+  e.preventDefault();const fm=e.target,p=pasta(fm),v=n=>fm.elements[n].value.trim();
+  if(fm.dataset.f==='ex'){p.ex.push({id:uid(),n:v('n'),s:+v('s'),r:v('r'),p:v('p')===''?null:+v('p'),m:v('m')});toast('Exercício adicionado')}
+  else{
+    const tipo=v('tipo');if(tipo==='outro'&&!v('nome')){toast('Informe o nome do cardio');return}
+    p.ca.push({id:uid(),tipo,nome:tipo==='outro'?v('nome'):'',desc:tipo==='outro'?v('desc'):'',min:+v('min')});toast('Cardio adicionado');
+  }
+  abertas.add(p.id);sv();renderHoje();renderPastas();
+});
+$('#gal').onclick=()=>{const s=$('#galeria');s.hidden=!s.hidden;if(!s.hidden){galeria();s.scrollIntoView({behavior:'smooth',block:'start'})}};
+renderHoje();renderPastas();
+/* depois da meia-noite, troca para o treino do novo dia */
+novoDia(()=>{$('#pd').value=wd();renderHoje()});
+})();
+</script>

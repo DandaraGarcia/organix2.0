@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Pagamento | Organix</title>
+<body data-app><div class="pg">
+<form class="card" id="f"><h1>Pagamento</h1><p class="mut">Ambiente de demonstração: nenhum valor é cobrado de verdade.</p>
+<label for="nome">Nome no cartão</label><input id="nome" placeholder="Nome e Sobrenome" required>
+<label for="num">Número do cartão</label><input id="num" inputmode="numeric" placeholder="0000 0000 0000 0000" required minlength="19">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label for="val">Validade</label><input id="val" placeholder="MM/AA" required></div><div><label for="cvv">CVV</label><input id="cvv" inputmode="numeric" maxlength="4" required></div></div>
+<button class="btn rosa" id="pagar" style="width:100%;margin-top:18px">Pagar R$ 19,00</button></form>
+<div><div class="cc" aria-hidden="true"><div class="chip"></div><div class="n" id="vnum">•••• •••• •••• ••••</div><div class="b"><span id="vnome">NOME E SOBRENOME</span><span id="vval">MM/AA</span></div></div>
+<div class="card" style="margin-top:16px"><h2>Resumo do pedido</h2><div class="linha"><span>Organix Premium</span><b>R$ 19,00/mês</b></div><ul class="mut" style="padding-left:18px"><li>Registro do dia com calendário e resumo diário</li><li>Finanças com fechamento do mês e galeria</li><li>Rotinas de trabalho, alimentar e de academia</li></ul><p class="mut" style="margin-top:10px"><a href="app.html"><u>Voltar sem assinar</u></a></p></div></div></div>
+<div class="sucesso" id="ok" hidden><div class="check"></div><h1>Pagamento aprovado</h1><p class="mut">Seu plano Premium já está ativo.</p></div>
+<script src="app.js"></script><script>
+num.oninput=()=>{num.value=num.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();vnum.textContent=num.value||'•••• •••• •••• ••••'};
+nome.oninput=()=>vnome.textContent=nome.value.toUpperCase()||'NOME E SOBRENOME';
+val.oninput=()=>{let v=val.value.replace(/\D/g,'').slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);val.value=v;vval.textContent=v||'MM/AA'};
+f.onsubmit=e=>{e.preventDefault();pagar.disabled=true;pagar.innerHTML='<span class="spin"></span>Processando…';
+setTimeout(()=>{localStorage.plano='premium';ok.hidden=false;setTimeout(()=>location.href='app.html',1800)},1800)};
+</script>

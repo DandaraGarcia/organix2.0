@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Início | Organix</title>
+<body data-app><div class="app"><aside id="menu"></aside><main>
+<h1>Olá, <span id="nm">você</span></h1>
+<div class="card c4 linha" id="aviso" style="margin-bottom:16px"><span>Você está no plano gratuito. Desbloqueie registro do dia, finanças, trabalho, alimentação e academia.</span><a class="btn rosa" href="pagamento.html">Assinar Premium</a></div>
+<div class="grid g4" id="stats"></div>
+<div class="grid g2">
+<div><h2>Meu dia</h2>
+<ul class="lista" id="lista"></ul>
+<form class="card form" id="f" style="grid-template-columns:2fr 1fr auto"><div><label for="n">Nova atividade</label><input id="n" maxlength="40" placeholder="Ex.: Ler 10 páginas" required></div><div><label for="h">Horário</label><input id="h" type="time" required></div><button class="btn verde">Adicionar</button></form></div>
+<div class="card" style="display:grid;place-items:center;align-content:center;gap:10px"><h2>Progresso de hoje</h2><div class="anel" id="anel"><span id="pct">0%</span></div><span class="mut" id="cnt"></span></div></div>
+<div class="card"><h2>Progresso da semana</h2><div class="semana" id="semana" role="img" aria-label="Gráfico de progresso dos últimos 7 dias"></div><p class="mut" id="mediasem"></p></div>
+</main></div><script src="app.js"></script><script>
+(()=>{
+const PRE=[['Treino leve','07:00'],['Bloco de estudo','09:00'],['Trabalho focado','14:00'],['Tempo para mim','19:00']];
+let S=load('meudia',null);
+if(!S||!Array.isArray(S.opcoes)){S={opcoes:PRE.map(([n,h])=>({id:uid(),n,h})),feito:{},snap:{}};save('meudia',S)}
+S.feito=S.feito||{};S.snap=S.snap||{};
+let H=load('hist',{});
+$('#nm').textContent=L.nome||'você';
+const feitos=()=>(S.feito[hoje()]||[]).filter(id=>S.opcoes.some(o=>o.id===id));
+/* grava só o que o usuário realmente fez: nada é criado sem interação */
+function registra(){
+  const d=hoje(),f=feitos(),tot=S.opcoes.length;
+  S.feito[d]=f;
+  if(!tot){delete H[d];delete S.snap[d]}
+  else if(f.length||d in H||S.snap[d]){H[d]=Math.round(f.length/tot*100);S.snap[d]=S.opcoes.map(o=>({n:o.n,h:o.h,ok:f.includes(o.id)}))}
+  save('meudia',S);save('hist',H);
+}
+function stats(f,tot){
+  const E=load('entregas',[]),sem=E.filter(e=>{const r=diasAte(e.d);return r>=0&&r<=7&&e.p<100}).length;
+  const vs=[];for(let i=0;i<7;i++){const c=new Date();c.setDate(c.getDate()-i);if(H[key(c)]!==undefined)vs.push(H[key(c)])}
+  const media=vs.length?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length)+'%':'—';
+  let seq=0;const c=new Date();if(!(H[key(c)]>0))c.setDate(c.getDate()-1);while(H[key(c)]>0){seq++;c.setDate(c.getDate()-1)}
+  $('#stats').innerHTML=`<div class="card c1"><span class="mut">Entregas</span><div class="num">${sem?sem+' esta semana':'Nenhuma esta semana'}</div></div><div class="card c2"><span class="mut">Progresso médio</span><div class="num">${media}</div></div><div class="card c3"><span class="mut">Atividades de hoje</span><div class="num">${f} de ${tot}</div></div><div class="card c4"><span class="mut">Sequência</span><div class="num">${seq} dia${seq===1?'':'s'}</div></div>`;
+}
+function semana(){
+  let html='',vs=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const v=H[key(d)];if(v!==undefined)vs.push(v);
+    html+=`<div class="dia${i===0?' hoje':''}"><span class="v">${v===undefined?'—':v+'%'}</span><div class="area"><div class="b" style="height:${v||0}%${v===undefined?';min-height:0':''}"></div></div><small>${d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</small></div>`}
+  $('#semana').innerHTML=html;
+  $('#mediasem').textContent=vs.length?`Média dos ${vs.length} dia${vs.length>1?'s':''} com registro nos últimos 7 dias: ${Math.round(vs.reduce((a,b)=>a+b,0)/vs.length)}%`:'Ainda sem registros. Marque suas atividades de hoje para começar a contar o seu progresso.';
+}
+function render(){
+  S.opcoes.sort((a,b)=>(a.h||'').localeCompare(b.h||''));
+  const f=feitos(),tot=S.opcoes.length,p=tot?Math.round(f.length/tot*100):0;
+  $('#lista').innerHTML=tot?S.opcoes.map(o=>`<li class="${f.includes(o.id)?'feito':''}" data-id="${o.id}"><label><input type="checkbox" ${f.includes(o.id)?'checked':''}><span class="t">${esc(o.n)}</span></label><span class="h">${esc(o.h||'')}</span><button class="x" aria-label="Remover ${esc(o.n)}">×</button></li>`).join(''):'<li class="vazio-msg">Nenhuma atividade. Adicione a primeira abaixo.</li>';
+  $('#pct').textContent=p+'%';$('#anel').style.setProperty('--p',p);$('#cnt').textContent=tot?`${f.length} de ${tot} atividades`:'Sem atividades';
+  stats(f.length,tot);semana();
+}
+$('#lista').addEventListener('change',e=>{const li=e.target.closest('li');if(!li)return;const id=li.dataset.id,d=hoje(),f=feitos();S.feito[d]=e.target.checked?[...new Set([...f,id])]:f.filter(x=>x!==id);registra();render()});
+$('#lista').addEventListener('click',e=>{const b=e.target.closest('.x');if(!b)return;const id=b.closest('li').dataset.id;S.opcoes=S.opcoes.filter(o=>o.id!==id);registra();render();toast('Atividade removida')});
+$('#f').onsubmit=e=>{e.preventDefault();const n=$('#n').value.trim(),h=$('#h').value;if(!n||!h)return;S.opcoes.push({id:uid(),n,h});registra();render();e.target.reset();$('#n').focus();toast('Atividade adicionada')};
+render();novoDia(render);
+})();
+</script>

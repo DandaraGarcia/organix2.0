@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Registro do dia | Organix</title>
+<body data-app data-premium><div class="app"><aside id="menu"></aside><main><h1>Registro do dia</h1><div class="conteudo">
+<div class="card"><div class="cal-top"><button class="btn peq" id="ant" aria-label="Mês anterior">‹</button><select id="mes" aria-label="Escolher o mês"></select><button class="btn peq" id="prox" aria-label="Próximo mês">›</button></div><div class="cal" id="cal"></div></div>
+<p class="mut" id="dica" style="margin-top:14px">Selecione um dia no calendário para dar um nome a ele, escolher uma cor e registrar atividades.</p>
+<div class="card" id="painel" style="margin-top:16px" hidden></div>
+</div></main></div><script src="app.js"></script><script>
+(()=>{
+const CORES={vermelho:['#DC2626','#fff'],azul:['#2563EB','#fff'],amarelo:['#FACC15','#1a1500'],rosa:['#F9A8D4','#2a0b1f'],verde:['#16A34A','#fff'],roxo:['#7C3AED','#fff'],laranja:['#F97316','#1a0a00'],cinza:['#6B7280','#fff'],branco:['#FFFFFF','#111']};
+let DIAS=load('dias',{}),TAR=load('tarefas',[]);
+const n0=new Date();let ver=[n0.getFullYear(),n0.getMonth()],sel=null;
+const svD=()=>save('dias',DIAS),svT=()=>save('tarefas',TAR);
+const mesTxt=d=>cap(d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}));
+
+function renderMes(){
+  let o='';for(let i=-12;i<=12;i++){const d=new Date(ver[0],ver[1]+i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()}"${i===0?' selected':''}>${mesTxt(d)}</option>`}
+  $('#mes').innerHTML=o;
+}
+function renderCal(){
+  const [A,M]=ver,total=new Date(A,M+1,0).getDate(),ini=new Date(A,M,1).getDay(),hj=hoje();
+  let h=['dom','seg','ter','qua','qui','sex','sáb'].map(x=>`<div class="sem">${x}</div>`).join('')+'<div></div>'.repeat(ini);
+  for(let d=1;d<=total;d++){
+    const k=A+'-'+pad(M+1)+'-'+pad(d),info=DIAS[k]||{},c=CORES[info.cor]||['#000','#fff'],ts=TAR.filter(x=>x.d===k),ok=ts.filter(x=>x.ok).length;
+    h+=`<div class="cel${k===hj?' hoje':''}${k===sel?' sel':''}" data-k="${k}" role="button" tabindex="0" aria-label="Dia ${d}${info.nome?': '+esc(info.nome):''}" style="background:${c[0]};color:${c[1]}"><span class="n">${d}</span>${info.nome?`<span class="nm">${esc(info.nome)}</span>`:''}${ts.length?`<span class="q">${ok}/${ts.length} atividades</span>`:''}<button type="button" class="rs" data-r="${k}" aria-label="Resumo do dia ${d}">resumo<span> do dia</span></button></div>`;
+  }
+  $('#cal').innerHTML=h;
+}
+function renderPainel(){
+  const p=$('#painel');
+  if(!sel){p.hidden=true;$('#dica').hidden=false;return}
+  p.hidden=false;$('#dica').hidden=true;
+  const info=DIAS[sel]||{};
+  p.innerHTML=`<h2>${esc(diaLongo(sel))}</h2>
+  <label for="pn">Nome do dia</label><input id="pn" maxlength="40" placeholder="Ex.: Dia de prova" value="${esc(info.nome||'')}">
+  <label>Cor do dia no calendário</label>
+  <div class="cores" id="cores"><button type="button" class="cor" data-c="" style="background:#000" title="Padrão (preto)" aria-label="Padrão (preto)"></button>${Object.entries(CORES).map(([n,c])=>`<button type="button" class="cor" data-c="${n}" style="background:${c[0]}" title="${cap(n)}" aria-label="${cap(n)}"></button>`).join('')}</div>
+  <h3 style="margin:20px 0 8px">Atividades do dia</h3>
+  <ul class="lista" id="tl"></ul>
+  ${sel>hoje()?'<p class="mini" style="margin-bottom:12px">Este dia ainda não chegou: as atividades dele só poderão ser marcadas como concluídas a partir do próprio dia.</p>':''}
+  <form class="form" id="tf" style="grid-template-columns:2fr 1fr;margin:0"><div><label for="tt">Nome da atividade <span class="mini" id="c1">0/50</span></label><input id="tt" maxlength="50" required></div><div><label for="td">Data</label><input id="td" type="date" value="${sel}" required></div><div style="grid-column:1/-1"><label for="tdesc">Descrição <span class="mini" id="c2">0/250</span></label><textarea id="tdesc" maxlength="250" rows="3" placeholder="Detalhes da atividade (opcional)"></textarea></div><button class="btn verde" style="justify-self:start">Adicionar</button></form>`;
+  renderCores();renderTar();
+}
+function renderCores(){const c=(DIAS[sel]||{}).cor||'';$$('#cores .cor').forEach(b=>b.classList.toggle('on',b.dataset.c===c))}
+function renderTar(){
+  const ts=TAR.filter(x=>x.d===sel),hj=hoje();
+  $('#tl').innerHTML=ts.length?ts.map(x=>`<li class="${x.ok?'feito':''}" data-id="${x.id}"><label${x.d>hj?' title="Só é possível concluir atividades de hoje ou de dias anteriores"':''}><input type="checkbox" ${x.ok?'checked':''}${x.d>hj?' disabled':''}><span class="t">${esc(x.t)}${x.desc?`<small style="display:block;margin:3px 0 0">${esc(x.desc)}</small>`:''}</span></label><input type="date" class="dtl" value="${x.d}" aria-label="Data da atividade ${esc(x.t)}"><button class="x" aria-label="Remover ${esc(x.t)}">×</button></li>`).join(''):'<li class="vazio-msg">Nenhuma atividade neste dia. Adicione a primeira abaixo.</li>';
+}
+function render(){renderMes();renderCal();renderPainel()}
+
+$('#ant').onclick=()=>muda(-1);$('#prox').onclick=()=>muda(1);
+function muda(n){const d=new Date(ver[0],ver[1]+n,1);ver=[d.getFullYear(),d.getMonth()];sel=null;render()}
+$('#mes').onchange=e=>{const [a,m]=e.target.value.split('-').map(Number);ver=[a,m];sel=null;render()};
+$('#cal').addEventListener('click',e=>{
+  const r=e.target.closest('.rs');if(r){e.stopPropagation();modal(resumo(r.dataset.r),true);return}
+  const c=e.target.closest('.cel');if(!c)return;sel=c.dataset.k;renderCal();renderPainel();$('#painel').scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+$('#cal').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('cel')){e.preventDefault();sel=e.target.dataset.k;renderCal();renderPainel()}});
+const P_=$('#painel');
+P_.addEventListener('input',e=>{
+  if(e.target.id==='tt'){$('#c1').textContent=e.target.value.length+'/50';return}
+  if(e.target.id==='tdesc'){$('#c2').textContent=e.target.value.length+'/250';return}
+  if(e.target.id!=='pn')return;const i=DIAS[sel]||(DIAS[sel]={});i.nome=e.target.value;if(!i.nome&&!i.cor)delete DIAS[sel];svD();renderCal()});
+P_.addEventListener('click',e=>{
+  const c=e.target.closest('.cor');
+  if(c){const i=DIAS[sel]||(DIAS[sel]={});if(c.dataset.c)i.cor=c.dataset.c;else delete i.cor;if(!i.nome&&!i.cor)delete DIAS[sel];svD();renderCores();renderCal();return}
+  const x=e.target.closest('.x');
+  if(x){TAR=TAR.filter(t=>t.id!==x.closest('li').dataset.id);svT();renderTar();renderCal()}
+});
+P_.addEventListener('change',e=>{
+  const li=e.target.closest('#tl li');if(!li)return;const t=TAR.find(y=>y.id===li.dataset.id);if(!t)return;
+  if(e.target.type==='checkbox'){if(t.d>hoje()){e.target.checked=false;toast('Só é possível concluir atividades de hoje ou de dias anteriores');return}t.ok=e.target.checked;svT();renderTar();renderCal()}
+  else if(e.target.classList.contains('dtl')){if(!e.target.value){e.target.value=t.d;return}t.d=e.target.value;if(t.d>hoje())t.ok=false;svT();renderTar();renderCal();toast('Atividade movida para '+fmt(t.d))}
+});
+P_.addEventListener('submit',e=>{
+  e.preventDefault();const tx=$('#tt').value.trim().slice(0,50),d=$('#td').value||sel;if(!tx)return;
+  TAR.push({id:uid(),t:tx,desc:$('#tdesc').value.trim().slice(0,250),d,ok:false});svT();$('#tt').value='';$('#tdesc').value='';$('#c1').textContent='0/50';$('#c2').textContent='0/250';$('#td').value=sel;renderTar();renderCal();
+  toast(d===sel?'Atividade adicionada':'Atividade adicionada em '+fmt(d));$('#tt').focus();
+});
+render();novoDia(()=>{renderCal();if(sel)renderTar()});
+})();
+</script>

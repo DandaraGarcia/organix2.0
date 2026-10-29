@@ -1,0 +1,7 @@
+<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Criar conta | Organix</title>
+<body class="auth"><form class="card" id="f"><h1>Criar conta</h1><p class="mut">Comece grátis, sem cartão.</p>
+<label for="n">Nome</label><input id="n" required>
+<label for="e">E-mail</label><input id="e" type="email" placeholder="nome@email.com" required>
+<label for="s">Senha</label><input id="s" type="password" minlength="6" required>
+<button class="btn verde">Criar conta</button><p class="mut" style="margin-top:14px;text-align:center">Já tem conta? <a href="entrar.html"><u>Entrar</u></a></p></form>
+<script>f.onsubmit=e=>{e.preventDefault();const L=localStorage;L.logado='1';L.nome=n.value;L.plano=L.plano||'gratuito';location.href=new URLSearchParams(location.search).get('plano')==='premium'?'pagamento.html':'app.html'}</script>
